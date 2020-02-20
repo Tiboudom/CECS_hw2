@@ -62,7 +62,7 @@ void *func_cli(void *clifd)
 	while (1) {
 		bzero(buffer, BUFF_MAX); 
         read(cfd, buffer, sizeof(buffer)); 
-        printf("%s", buffer); 
+        printf("%s", buffer);
 		if (strncmp("exit\n", buffer, 5) == 0) {
 			shutdown(cfd, SHUT_RDWR);
 			close(cfd);
@@ -93,7 +93,7 @@ static void listen_for_cli(int sfd)
 			printf("ERROR (%d): server accept failed.\n", errno); 
 			exit(0); 
 		}
-		printf("Connected with %s\n.", inet_ntoa(cli.sin_addr));
+		printf("Connected with %s.\n", inet_ntoa(cli.sin_addr));
 		pthread_create(&tid, NULL, func_cli, (void *)&cfd);
 	}
 }
