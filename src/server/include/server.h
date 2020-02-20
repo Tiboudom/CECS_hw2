@@ -8,4 +8,9 @@
 #ifndef SERVER_H_
 #define SERVER_H_
 
+#define SA struct sockaddr
+#define BUFF_MAX 80
+#define Q_MAX 5
+#define COM_EXIT "exit"
+
 #endif /*SERVER_H_*/

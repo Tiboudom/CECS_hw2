@@ -7,6 +7,8 @@
 
 NAME	=	server
 
+LIBS=		-pthread
+
 SRC	=	src/main.c			\
 
 OBJ	=	$(SRC:.c=.o)
@@ -24,7 +26,7 @@ CC	=	gcc
 all:		$(NAME)
 
 $(NAME):	$(OBJ)
-		@$(CC) -o $(NAME) $(OBJ)
+		@$(CC) -o $(NAME) $(OBJ) $(LIBS)
 
 clean:
 		@$(RM) $(OBJ)
