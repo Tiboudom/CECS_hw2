@@ -12,5 +12,6 @@
 #define BUFF_MAX 80
 #define Q_MAX 5
 #define COM_EXIT "exit"
+#define COM_DIR "dir"
 
 #endif /*SERVER_H_*/
