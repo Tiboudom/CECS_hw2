@@ -11,8 +11,11 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <string.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <errno.h>
@@ -34,6 +37,7 @@ static	int	get_port(int ac, char **av)
 		return (port);
 	}
 }
+
 static void create_socket(int port, int *sfd)
 {
     struct sockaddr_in servaddr;
@@ -60,12 +64,14 @@ static void *func_cli(void *clifd)
 	int cfd = *((int *)clifd);
 	char buffer[BUFF_MAX];
 	char path[PATH_MAX];
+	int fdfile, sizefile;
 	DIR *dir;
 	struct dirent *ent;
+	struct stat st;
 
 	getcwd(path, sizeof(path));
 	while (1) {
-		bzero(buffer, BUFF_MAX); 
+		bzero(buffer, BUFF_MAX);
         read(cfd, buffer, sizeof(buffer));
 		buffer[strlen(buffer)-1] = 0;
 		if (strncmp(COM_EXIT, buffer, 4) == 0) {
@@ -85,6 +91,17 @@ static void *func_cli(void *clifd)
 		} else {
 			if (access(buffer, F_OK) != -1) {
 				dprintf(cfd, "file exists!\n");
+				stat(buffer, &st);
+				sizefile = st.st_size;
+				dprintf(cfd,"%d\n", sizefile);
+				fdfile = open(buffer, O_RDONLY);
+				while (sizefile > 0) {
+					bzero(buffer, BUFF_MAX);
+					read(fdfile, buffer, sizeof(buffer));
+					dprintf(cfd, "%s", buffer);
+					sizefile = sizefile - BUFF_MAX;
+				}
+				close(fdfile);
 			} else {
 				dprintf(cfd, "file does not exist!!\n");
 			}
