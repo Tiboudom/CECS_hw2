@@ -59,15 +59,48 @@ static void create_socket(int port, int *sfd)
 	printf("Socket binded on port %d.\n", port); 
 }
 
+static void command_dir(int cfd, char path[])
+{
+	DIR *dir;
+	struct dirent *ent;
+
+	if ((dir = opendir (path)) != NULL) {
+		while ((ent = readdir (dir)) != NULL) {
+			dprintf(cfd, "%s\n", ent->d_name);
+		}
+	}
+	closedir (dir);
+}
+
+static void command_file(int cfd, char filename[])
+{
+	char fcontent[FILE_MAX];
+	int fdfile, sizefile;
+	struct stat st;
+
+	if (access(filename, F_OK) != -1) {
+		dprintf(cfd, "file exists!\n");
+		stat(filename, &st);
+		sizefile = st.st_size;
+		dprintf(cfd,"%d\n", sizefile);
+		fdfile = open(filename, O_RDONLY);
+		while (sizefile > 0) {
+			bzero(fcontent, FILE_MAX);
+			read(fdfile, fcontent, sizeof(fcontent));
+			dprintf(cfd, "%s", fcontent);
+			sizefile = sizefile - FILE_MAX;
+		}
+		close(fdfile);
+	} else {
+		dprintf(cfd, "file does not exist!!\n");
+	}
+}
+
 static void *func_cli(void *clifd)
 {
 	int cfd = *((int *)clifd);
 	char buffer[BUFF_MAX];
 	char path[PATH_MAX];
-	int fdfile, sizefile;
-	DIR *dir;
-	struct dirent *ent;
-	struct stat st;
 
 	getcwd(path, sizeof(path));
 	while (1) {
@@ -81,30 +114,9 @@ static void *func_cli(void *clifd)
             printf("Connection with client closed.\n");
             break;
         } else if (strncmp(COM_DIR, buffer, 3) == 0) {
-			if ((dir = opendir (path)) != NULL) {
-				while ((ent = readdir (dir)) != NULL) {
-					if (ent->d_type == DT_REG)
-						dprintf(cfd, "%s\n", ent->d_name);
-				}
-				closedir (dir);
-			}
+			command_dir(cfd, path);
 		} else {
-			if (access(buffer, F_OK) != -1) {
-				dprintf(cfd, "file exists!\n");
-				stat(buffer, &st);
-				sizefile = st.st_size;
-				dprintf(cfd,"%d\n", sizefile);
-				fdfile = open(buffer, O_RDONLY);
-				while (sizefile > 0) {
-					bzero(buffer, BUFF_MAX);
-					read(fdfile, buffer, sizeof(buffer));
-					dprintf(cfd, "%s", buffer);
-					sizefile = sizefile - BUFF_MAX;
-				}
-				close(fdfile);
-			} else {
-				dprintf(cfd, "file does not exist!!\n");
-			}
+			command_file(cfd, buffer);
 		}
 	}
 	return (clifd);
