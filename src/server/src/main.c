@@ -76,23 +76,28 @@ static void command_file(int cfd, char filename[])
 {
 	char fcontent[FILE_MAX];
 	int fdfile, sizefile;
-	struct stat st;
 
 	if (access(filename, F_OK) != -1) {
 		dprintf(cfd, "file exists!\n");
-		stat(filename, &st);
-		sizefile = st.st_size;
-		dprintf(cfd,"%d\n", sizefile);
-		fdfile = open(filename, O_RDONLY);
-		while (sizefile > 0) {
-			bzero(fcontent, FILE_MAX);
-			read(fdfile, fcontent, sizeof(fcontent));
-			dprintf(cfd, "%s", fcontent);
-			sizefile = sizefile - FILE_MAX;
-		}
-		close(fdfile);
 	} else {
 		dprintf(cfd, "file does not exist!!\n");
+		sizefile = 0;
+		char fread = 0;
+		while (fread != '\n') {
+			read(cfd, &fread, 1);
+			if (fread >= '0' && fread <= '9')
+				sizefile = (sizefile * 10) + (fread - '0');
+		}
+		fdfile = open(filename, O_WRONLY | O_APPEND | O_CREAT, 0644);
+		int i = 0;
+		int r = 0;
+		while (i < sizefile) {
+			bzero(fcontent, sizeof(fcontent));
+			r = read(cfd, fcontent, sizeof(fcontent));
+			write(fdfile, fcontent, r);
+			i = i + r;
+		}
+		close(fdfile);
 	}
 }
 
