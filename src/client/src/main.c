@@ -61,6 +61,7 @@ static void			connect_client(char *ip, int port)
 	}
 	printf("Connection established\n");
 	printf("IP: %s Port: %d\n", ip, port);
+	dprintf(sock, "dir\n");
 	str = get_input(sock);
 	printf("%s\n", str);
 	free(str);
