@@ -43,6 +43,7 @@ static void			connect_client(char *ip, int port)
 	int			sock = 0;
 	struct sockaddr_in	serv_addr;
 	char 			*str;
+	char 			*cmd;
 
 	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 		printf("Socket creation error\n");
@@ -61,10 +62,12 @@ static void			connect_client(char *ip, int port)
 	}
 	printf("Connection established\n");
 	printf("IP: %s Port: %d\n", ip, port);
-	dprintf(sock, "dir\n");
+	cmd = get_input(0);
+	dprintf(sock, "%s\n", cmd);
 	str = get_input(sock);
 	printf("%s\n", str);
 	free(str);
+	free(cmd);
 }
 
 int	main(int ac, char **av)
