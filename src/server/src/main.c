@@ -68,6 +68,7 @@ static void command_dir(int cfd, char path[])
 		while ((ent = readdir (dir)) != NULL) {
 			dprintf(cfd, "%s\n", ent->d_name);
 		}
+		dprintf(cfd, "ENDOFCMDS\n");
 	}
 	closedir (dir);
 }
